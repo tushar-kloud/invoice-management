@@ -67,7 +67,9 @@ export default function InvoiceGeneration() {
       <CardHeader>
         <CardTitle>Upload Purchase Order</CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent 
+      // onDrag={(e)=>(document.querySelector('input[type=file]').click())}
+      >
         <div className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-muted-foreground/25 rounded-lg bg-muted/50">
           <FileText className="h-10 w-10 text-muted-foreground mb-4" />
           <p className="text-sm text-muted-foreground mb-2">Drag and drop your PO file, or click to browse</p>
@@ -80,7 +82,7 @@ export default function InvoiceGeneration() {
             accept=".pdf,.docx,.png,.jpg,.jpeg"
           />
           <Label htmlFor="po-file" asChild>
-            <Button variant="outline">
+            <Button variant="outline" onClick={() => document.querySelector('input[type=file]').click()}>
               <Upload className="mr-2 h-4 w-4" />
               Select File
             </Button>
@@ -94,7 +96,7 @@ export default function InvoiceGeneration() {
               <span className="text-sm font-medium truncate max-w-[200px]">{file.name}</span>
             </div>
             <Button onClick={handleUpload} disabled={status !== "idle"} size="sm">
-              {status === "idle" ? "Process" : "Processing..."}
+              {status === "idle" ? "Process" : status=="completed" ? "Analyzed" : "Processing..."}
             </Button>
           </div>
         )}

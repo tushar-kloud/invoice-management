@@ -1,5 +1,3 @@
-
-// import type React from "react"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
@@ -81,7 +79,7 @@ export default function ReconcilePO() {
               accept=".pdf,.docx,.png,.jpg,.jpeg"
             />
             <Label htmlFor="po-file" asChild>
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" onClick={() => document.getElementById('po-file').click()}>
                 <Upload className="mr-2 h-4 w-4" />
                 Select File
               </Button>
@@ -117,7 +115,7 @@ export default function ReconcilePO() {
               accept=".pdf,.docx,.png,.jpg,.jpeg"
             />
             <Label htmlFor="invoice-file" asChild>
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" onClick={() => document.getElementById('invoice-file').click()}>
                 <Upload className="mr-2 h-4 w-4" />
                 Select File
               </Button>
@@ -149,6 +147,11 @@ export default function ReconcilePO() {
             <>
               <FileCheck className="mr-2 h-5 w-5" />
               Reconcile Documents
+            </>
+          ) : status == "completed" ? (
+            <>
+              <FileCheck className="mr-2 h-5 w-5" />
+              Reconciliation Complete
             </>
           ) : (
             <>
@@ -310,4 +313,3 @@ export default function ReconcilePO() {
     </div>
   )
 }
-
