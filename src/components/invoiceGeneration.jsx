@@ -43,6 +43,18 @@ export default function InvoiceGeneration() {
     }, 300)
   }
 
+  const handleDrop = (e) => {
+    e.preventDefault();
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      setFile(e.dataTransfer.files[0]);
+      setStatus("idle");
+    }
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+  };
+
   const simulateAnalysis = () => {
     // Simulate AI analyzing the document
     setTimeout(() => {
@@ -67,10 +79,13 @@ export default function InvoiceGeneration() {
       <CardHeader>
         <CardTitle>Upload Purchase Order</CardTitle>
       </CardHeader>
-      <CardContent 
+      <CardContent
       // onDrag={(e)=>(document.querySelector('input[type=file]').click())}
       >
-        <div className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-muted-foreground/25 rounded-lg bg-muted/50">
+        <div className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-muted-foreground/25 rounded-lg bg-muted/50"
+          onDrop={handleDrop}
+          onDragOver={handleDragOver}
+        >
           <FileText className="h-10 w-10 text-muted-foreground mb-4" />
           <p className="text-sm text-muted-foreground mb-2">Drag and drop your PO file, or click to browse</p>
           <p className="text-xs text-muted-foreground mb-4">Supports PDF, DOCX, and image files</p>
@@ -96,7 +111,7 @@ export default function InvoiceGeneration() {
               <span className="text-sm font-medium truncate max-w-[200px]">{file.name}</span>
             </div>
             <Button onClick={handleUpload} disabled={status !== "idle"} size="sm">
-              {status === "idle" ? "Process" : status=="completed" ? "Analyzed" : "Processing..."}
+              {status === "idle" ? "Process" : status == "completed" ? "Analyzed" : "Processing..."}
             </Button>
           </div>
         )}
