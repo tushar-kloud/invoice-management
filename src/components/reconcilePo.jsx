@@ -81,7 +81,7 @@ export default function ReconcilePO() {
               accept=".pdf,.docx,.png,.jpg,.jpeg"
             />
             <Label htmlFor="po-file" asChild>
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" onClick={() => document.querySelector('input[type=file]').click()}>
                 <Upload className="mr-2 h-4 w-4" />
                 Select File
               </Button>
@@ -117,7 +117,7 @@ export default function ReconcilePO() {
               accept=".pdf,.docx,.png,.jpg,.jpeg"
             />
             <Label htmlFor="invoice-file" asChild>
-              <Button variant="outline" size="sm">
+              <Button variant="outline" size="sm" onClick={() => document.querySelector('input[type=file]').click()}>
                 <Upload className="mr-2 h-4 w-4" />
                 Select File
               </Button>
