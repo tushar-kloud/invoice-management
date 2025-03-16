@@ -4,21 +4,52 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent } from "@/components/ui/card"
-import { Send, FileText, FileCheck, HelpCircle } from "lucide-react"
+import { Send, FileText, FileCheck, HelpCircle, Paperclip, XCircle, Loader2 } from "lucide-react"
 
 export default function ChatInterface() {
   const [messages, setMessages] = useState([
-    {
-      role: "assistant",
-      content: "Hello, I am your personal Invoice Management Agent. I can help you with the following tasks:",
-      options: [
-        { id: "generate", label: "Generate invoice from PO", icon: FileText },
-        { id: "reconcile", label: "Reconcile PO & Invoice", icon: FileCheck },
-        { id: "query", label: "Answer invoice related queries", icon: HelpCircle },
-      ],
-    },
+    // {
+    //   role: "assistant",
+    //   content: "Hello, I am your personal Invoice Management Agent. I can help you with the following tasks:",
+    //   options: [
+    //     { id: "generate", label: "Generate invoice from PO", icon: FileText },
+    //     { id: "reconcile", label: "Reconcile PO & Invoice", icon: FileCheck },
+    //     { id: "query", label: "Answer invoice related queries", icon: HelpCircle },
+    //   ],
+    // },
   ])
   const [inputValue, setInputValue] = useState("")
+  const [file, setFile] = useState(null);
+  const [uploading, setUploading] = useState(false);
+
+  const handleFileChange = (e) => {
+    const selectedFiles = Array.from(e.target.files);
+    if (files.length + selectedFiles.length <= 10) {
+      setFiles((prev) => [...prev, ...selectedFiles]);
+    } else {
+      alert('You can upload a maximum of 10 files.');
+    }
+  };
+
+  const handleRemoveFile = (index) => {
+    setFiles((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const handleSubmit = async () => {
+    if (inputValue.trim() || files.length) {
+      setUploading(true);
+
+      // Simulate file upload delay
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      handleSend(inputValue, files);
+
+      setInputValue('');
+      setFiles([]);
+      setUploading(false);
+    }
+  };
+
 
   const handleSend = () => {
     if (!inputValue.trim()) return
@@ -73,7 +104,7 @@ export default function ChatInterface() {
 
   return (
     <div className="flex flex-col h-[calc(100vh-8rem)]">
-      <div className="flex-1 overflow-y-auto mb-4 space-y-4">
+      <div className="flex-1 overflow-y-auto mb-1 space-top-4">
         {messages.map((message, index) => (
           <div key={index} className={cn("flex", message.role === "user" ? "justify-end" : "justify-start")}>
             <Card
@@ -103,18 +134,62 @@ export default function ChatInterface() {
         ))}
       </div>
 
-      <div className="flex items-center space-x-2">
-        <Input
+      <div>
+      {/* File Preview Section */}
+      {files.length > 0 && (
+        <div className="flex flex-wrap gap-2 mb-2">
+          {files.map((file, index) => (
+            <div key={index} className="flex items-center space-x-1 bg-gray-100 px-2 py-1 rounded-lg text-sm">
+              <span className="truncate">{file.name}</span>
+              <button onClick={() => handleRemoveFile(index)}>
+                <XCircle className="h-4 w-4 text-red-500 hover:text-red-700" />
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Input Section */}
+      <div className="flex items-center space-x-3 border p-2 rounded-lg shadow-md">
+        {/* File Upload Button */}
+        <label htmlFor="file-upload" className="cursor-pointer flex items-center">
+          <Paperclip className="h-5 w-5 text-gray-500 hover:text-gray-700 transition-colors" />
+          <input
+            id="file-upload"
+            type="file"
+            className="hidden"
+            multiple
+            onChange={handleFileChange}
+            accept=".pdf,.doc,.docx,.xlsx,.csv,.png,.jpg,.jpeg,.mp3"
+          />
+        </label>
+
+        {/* Input Field */}
+        <textarea
           placeholder="Type your message here..."
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && handleSend()}
-          className="flex-1"
+          onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleSubmit()}
+          className="flex-1 h-20 resize-none rounded-md border border-gray-300 p-2 focus:ring-2 focus:ring-blue-400 transition-all"
+          disabled={uploading}
         />
-        <Button onClick={handleSend} type="submit">
-          <Send className="h-4 w-4" />
+
+        {/* Send Button */}
+        <Button
+          style={{ cursor: 'pointer' }}
+          onClick={handleSubmit}
+          type="submit"
+          disabled={uploading}
+          className="bg-black hover:bg-gray-800 transition-all"
+        >
+          {uploading ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <Send className="h-4 w-4" />
+          )}
         </Button>
       </div>
+    </div>
     </div>
   )
 }

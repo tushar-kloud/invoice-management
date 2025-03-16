@@ -14,6 +14,7 @@ export default function ReconcilePO() {
   const [invoiceFile, setInvoiceFile] = useState(null)
   const [status, setStatus] = useState("idle")
   const [reconcileResults, setReconcileResults] = useState(null)
+  const [dragActive, setDragActive] = useState({ po: false, invoice: false })
 
   const handlePoFileChange = (e) => {
     if (e.target.files && e.target.files[0]) {
@@ -24,6 +25,44 @@ export default function ReconcilePO() {
   const handleInvoiceFileChange = (e) => {
     if (e.target.files && e.target.files[0]) {
       setInvoiceFile(e.target.files[0])
+    }
+  }
+
+  const handlePoDragOver = (e) => {
+    e.preventDefault()
+    setDragActive({ ...dragActive, po: true })
+  }
+
+  const handlePoDragLeave = (e) => {
+    e.preventDefault()
+    setDragActive({ ...dragActive, po: false })
+  }
+
+  const handlePoDrop = (e) => {
+    e.preventDefault()
+    setDragActive({ ...dragActive, po: false })
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      setPoFile(e.dataTransfer.files[0])
+      setStatus("idle")
+    }
+  }
+
+  const handleInvoiceDragOver = (e) => {
+    e.preventDefault()
+    setDragActive({ ...dragActive, invoice: true })
+  }
+
+  const handleInvoiceDragLeave = (e) => {
+    e.preventDefault()
+    setDragActive({ ...dragActive, invoice: false })
+  }
+
+  const handleInvoiceDrop = (e) => {
+    e.preventDefault()
+    setDragActive({ ...dragActive, invoice: false })
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      setInvoiceFile(e.dataTransfer.files[0])
+      setStatus("idle")
     }
   }
 
@@ -68,7 +107,11 @@ export default function ReconcilePO() {
           <CardTitle>Upload Purchase Order</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-muted-foreground/25 rounded-lg bg-muted/50">
+          <div
+            onDragOver={handlePoDragOver}
+            onDragLeave={handlePoDragLeave}
+            onDrop={handlePoDrop}
+            className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-muted-foreground/25 rounded-lg bg-muted/50">
             <FileText className="h-10 w-10 text-muted-foreground mb-4" />
             <p className="text-sm text-muted-foreground mb-2">Upload your PO file</p>
             <Input
@@ -104,7 +147,11 @@ export default function ReconcilePO() {
           <CardTitle>Upload Invoice</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-muted-foreground/25 rounded-lg bg-muted/50">
+          <div
+            onDragOver={handleInvoiceDragOver}
+            onDragLeave={handleInvoiceDragLeave}
+            onDrop={handleInvoiceDrop}
+            className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-muted-foreground/25 rounded-lg bg-muted/50">
             <FileCheck className="h-10 w-10 text-muted-foreground mb-4" />
             <p className="text-sm text-muted-foreground mb-2">Upload your invoice file</p>
             <Input
