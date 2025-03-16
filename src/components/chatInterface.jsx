@@ -1,86 +1,90 @@
 import { cn } from "../lib/utils"
-
-import { useState } from "react"
+import { useRef } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent } from "@/components/ui/card"
 import { Send, FileText, FileCheck, HelpCircle, Paperclip, XCircle, Loader2 } from "lucide-react"
 
 export default function ChatInterface() {
-  const [messages, setMessages] = useState([
-    // {
-    //   role: "assistant",
-    //   content: "Hello, I am your personal Invoice Management Agent. I can help you with the following tasks:",
-    //   options: [
-    //     { id: "generate", label: "Generate invoice from PO", icon: FileText },
-    //     { id: "reconcile", label: "Reconcile PO & Invoice", icon: FileCheck },
-    //     { id: "query", label: "Answer invoice related queries", icon: HelpCircle },
-    //   ],
-    // },
-  ])
+  const [messages, setMessages] = useState(() => {
+    const storedMessages = localStorage.getItem("chatMessages")
+    return storedMessages ? JSON.parse(storedMessages) : []
+  })
   const [inputValue, setInputValue] = useState("")
-  const [file, setFile] = useState(null);
-  const [uploading, setUploading] = useState(false);
+  const [files, setFiles] = useState([])
+  const [uploading, setUploading] = useState(false)
+  const messagesEndRef = useRef(null)
+
+  useEffect(() => {
+    localStorage.setItem("chatMessages", JSON.stringify(messages))
+  }, [messages])
 
   const handleFileChange = (e) => {
-    const selectedFiles = Array.from(e.target.files);
+    const selectedFiles = Array.from(e.target.files)
     if (files.length + selectedFiles.length <= 10) {
-      setFiles((prev) => [...prev, ...selectedFiles]);
+      setFiles((prev) => [...prev, ...selectedFiles])
     } else {
-      alert('You can upload a maximum of 10 files.');
+      alert("You can upload a maximum of 10 files.")
     }
-  };
+  }
 
   const handleRemoveFile = (index) => {
-    setFiles((prev) => prev.filter((_, i) => i !== index));
-  };
+    setFiles((prev) => prev.filter((_, i) => i !== index))
+  }
 
   const handleSubmit = async () => {
     if (inputValue.trim() || files.length) {
-      setUploading(true);
+      setUploading(true)
 
-      // Simulate file upload delay
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      // Add user message
+      const newUserMessage = { role: "user", content: inputValue }
+      setMessages((prev) => [...prev, newUserMessage])
 
-      handleSend(inputValue, files);
+      try {
+        const payload = {
+          input_value: inputValue,
+          output_type: "chat",
+          input_type: "chat",
+        }
 
-      setInputValue('');
-      setFiles([]);
-      setUploading(false);
+        const response = await fetch(
+          "https://langflow-v3-large.salmonisland-47da943e.centralindia.azurecontainerapps.io/api/v1/run/d7af9af5-efbc-46c1-924e-25397792d27a?stream=false",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(payload),
+          }
+        )
+
+        if (response.ok) {
+          const data = await response.json()
+          const aiResponse = data?.outputs?.[0]?.outputs?.[0]?.results?.message?.data?.text
+
+          if (aiResponse) {
+            const newAIMessage = { role: "assistant", content: aiResponse }
+            setMessages((prev) => [...prev, newAIMessage])
+          }
+        } else {
+          console.error("Failed to fetch AI response")
+        }
+      } catch (error) {
+        console.error("Error:", error)
+      }
+
+      setInputValue("")
+      setFiles([])
+      setUploading(false)
     }
-  };
-
-
-  const handleSend = () => {
-    if (!inputValue.trim()) return
-
-    // Add user message
-    setMessages([...messages, { role: "user", content: inputValue }])
-
-    // Simulate AI response (in a real app, this would call an API)
-    setTimeout(() => {
-      setMessages((prev) => [
-        ...prev,
-        {
-          role: "assistant",
-          content: "I'll help you with that request. Would you like to proceed with one of these options?",
-          options: [
-            { id: "generate", label: "Generate invoice from PO", icon: FileText },
-            { id: "reconcile", label: "Reconcile PO & Invoice", icon: FileCheck },
-            { id: "query", label: "Answer invoice related queries", icon: HelpCircle },
-          ],
-        },
-      ])
-    }, 1000)
-
-    setInputValue("")
   }
 
   const handleOptionClick = (optionId) => {
-    // Add user selection as a message
-    const option = messages[messages.length - 1].options?.find((opt) => opt.id === optionId)
+    const option = messages[messages.length - 1]?.options?.find((opt) => opt.id === optionId)
     if (option) {
-      setMessages([...messages, { role: "user", content: option.label }])
+      const newUserMessage = { role: "user", content: option.label }
+      setMessages((prev) => [...prev, newUserMessage])
 
       // Simulate AI response based on selection
       setTimeout(() => {
@@ -102,19 +106,24 @@ export default function ChatInterface() {
     }
   }
 
+  useEffect(() => {
+    // Scroll to bottom when messages update
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
+  }, [messages])
+
   return (
     <div className="flex flex-col h-[calc(100vh-8rem)]">
       <div className="flex-1 overflow-y-auto mb-1 space-top-4">
         {messages.map((message, index) => (
-          <div key={index} className={cn("flex", message.role === "user" ? "justify-end" : "justify-start")}>
+          <div style={{marginY:'10px'}} key={index} className={cn("flex my-3", message.role === "user" ? "justify-end" : "justify-start")}>
             <Card
               className={cn("max-w-[80%]", message.role === "user" ? "bg-primary text-primary-foreground" : "bg-muted")}
             >
-              <CardContent className="p-4">
-                <p>{message.content}</p>
+              <CardContent className="px-4 !py-0.5">
+                <p dangerouslySetInnerHTML={{ __html: message.content.replace(/\n/g, "<br />") }} />
 
-                {message.options && (
-                  <div className="mt-4 space-y-2">
+                {/* {message.options && (
+                  <div className="mt-2 space-y-1">
                     {message.options.map((option) => (
                       <Button
                         key={option.id}
@@ -127,69 +136,70 @@ export default function ChatInterface() {
                       </Button>
                     ))}
                   </div>
-                )}
+                )} */}
               </CardContent>
             </Card>
           </div>
         ))}
+        {/* Invisible div to track the last message and trigger scroll */}
+        <div ref={messagesEndRef} />
       </div>
 
       <div>
-      {/* File Preview Section */}
-      {files.length > 0 && (
-        <div className="flex flex-wrap gap-2 mb-2">
-          {files.map((file, index) => (
-            <div key={index} className="flex items-center space-x-1 bg-gray-100 px-2 py-1 rounded-lg text-sm">
-              <span className="truncate">{file.name}</span>
-              <button onClick={() => handleRemoveFile(index)}>
-                <XCircle className="h-4 w-4 text-red-500 hover:text-red-700" />
-              </button>
-            </div>
-          ))}
-        </div>
-      )}
+        {/* File Preview Section */}
+        {files.length > 0 && (
+          <div className="flex flex-wrap gap-1 mb-1">
+            {files.map((file, index) => (
+              <div key={index} className="flex items-center space-x-1 bg-gray-100 px-2 py-1 rounded-lg text-sm">
+                <span className="truncate">{file.name}</span>
+                <button onClick={() => handleRemoveFile(index)}>
+                  <XCircle className="h-4 w-4 text-red-500 hover:text-red-700" />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
 
-      {/* Input Section */}
-      <div className="flex items-center space-x-3 border p-2 rounded-lg shadow-md">
-        {/* File Upload Button */}
-        <label htmlFor="file-upload" className="cursor-pointer flex items-center">
-          <Paperclip className="h-5 w-5 text-gray-500 hover:text-gray-700 transition-colors" />
-          <input
-            id="file-upload"
-            type="file"
-            className="hidden"
-            multiple
-            onChange={handleFileChange}
-            accept=".pdf,.doc,.docx,.xlsx,.csv,.png,.jpg,.jpeg,.mp3"
+        {/* Input Section */}
+        <div className="flex items-center space-x-3 border p-2 rounded-lg shadow-md">
+          {/* File Upload Button */}
+          <label htmlFor="file-upload" className="cursor-pointer flex items-center">
+            <Paperclip className="h-5 w-5 text-gray-500 hover:text-gray-700 transition-colors" />
+            <input
+              id="file-upload"
+              type="file"
+              className="hidden"
+              multiple
+              onChange={handleFileChange}
+              accept=".pdf,.doc,.docx,.xlsx,.csv,.png,.jpg,.jpeg,.mp3"
+            />
+          </label>
+
+          {/* Input Field */}
+          <textarea
+            placeholder="Type your message here..."
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && handleSubmit()}
+            className={cn(
+              "flex-1 h-20 resize-none rounded-md border border-gray-300 p-2 focus:ring-2 focus:ring-blue-400 transition-all",
+              uploading ? "cursor-not-allowed bg-gray-100 text-gray-400" : ""
+            )}
+            disabled={uploading}
           />
-        </label>
 
-        {/* Input Field */}
-        <textarea
-          placeholder="Type your message here..."
-          value={inputValue}
-          onChange={(e) => setInputValue(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleSubmit()}
-          className="flex-1 h-20 resize-none rounded-md border border-gray-300 p-2 focus:ring-2 focus:ring-blue-400 transition-all"
-          disabled={uploading}
-        />
-
-        {/* Send Button */}
-        <Button
-          style={{ cursor: 'pointer' }}
-          onClick={handleSubmit}
-          type="submit"
-          disabled={uploading}
-          className="bg-black hover:bg-gray-800 transition-all"
-        >
-          {uploading ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            <Send className="h-4 w-4" />
-          )}
-        </Button>
+          {/* Send Button */}
+          <Button
+            style={{ cursor: "pointer" }}
+            onClick={handleSubmit}
+            type="submit"
+            disabled={uploading}
+            className="bg-black hover:bg-gray-800 transition-all"
+          >
+            {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+          </Button>
+        </div>
       </div>
-    </div>
     </div>
   )
 }
