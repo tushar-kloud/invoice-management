@@ -19,7 +19,7 @@ export default function ChatInterface() {
     // },
   ])
   const [inputValue, setInputValue] = useState("")
-  const [file, setFile] = useState(null);
+  const [files, setFile] = useState([]);
   const [uploading, setUploading] = useState(false);
 
   const handleFileChange = (e) => {
@@ -136,7 +136,7 @@ export default function ChatInterface() {
 
       <div>
       {/* File Preview Section */}
-      {files.length > 0 && (
+      {files?.length > 0 && (
         <div className="flex flex-wrap gap-2 mb-2">
           {files.map((file, index) => (
             <div key={index} className="flex items-center space-x-1 bg-gray-100 px-2 py-1 rounded-lg text-sm">
