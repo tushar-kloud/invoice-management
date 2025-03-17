@@ -67,7 +67,7 @@ export default function Home() {
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col">
-        <header className="border-b bg-white dark:bg-slate-800 p-4">
+        <header className="border-b bg-white dark:bg-slate-800 p-6">
           <h1 className="text-xl font-semibold">
             {activeTab === "chat" && "AI Assistant"}
             {activeTab === "generate" && "Generate Invoice from PO"}
