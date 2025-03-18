@@ -8,15 +8,17 @@ import { MessageCircle, FileText, FileCheck } from "lucide-react"
 import InvoiceGeneration from "../components/invoiceGeneration"
 import ReconcilePO from "../components/reconcilePo"
 import ChatInterface from "../components/chatInterface"
+import Sidebar from "../components/SideBar"
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState("chat")
   const [message, setMessage] = useState("")
 
   return (
-    <div className="flex min-h-screen bg-slate-50 dark:bg-slate-900">
+    <div className="flex bg-slate-50 dark:bg-slate-900">
+      {/* <Header/> */}
       {/* Sidebar */}
-      <div className="w-64 border-r bg-white dark:bg-slate-800 p-4 flex flex-col">
+      {/* <div className="w-64 border-r bg-white dark:bg-slate-800 p-4 flex flex-col">
         <div className="mb-8">
           <h2 className="text-2xl font-bold text-primary">Invoice AI</h2>
           <p className="text-sm text-muted-foreground">Your personal invoice assistant</p>
@@ -56,13 +58,16 @@ export default function Home() {
             </div>
             <div className="ml-2">
               <p className="text-sm font-medium">User Account</p>
-              {/* <p className="text-xs text-muted-foreground">Pro Plan</p> */}
+              
             </div>
           </div>
           <Button variant="outline" size="sm" className="w-full">
             Settings
           </Button>
         </div>
+      </div> */}
+      <div className="mix-w-264 border-r bg-white dark:bg-slate-800 flex flex-col">
+        <Sidebar />
       </div>
 
       {/* Main Content */}

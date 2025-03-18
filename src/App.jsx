@@ -3,14 +3,18 @@ import { useState } from 'react'
 // import viteLogo from '/vite.svg'
 // import './App.css'
 import Home from './pages/layoutPage'
+import Header from './globalComponents/Header'
 
 function App() {
   const [count, setCount] = useState(0)
 
   return (
-    <>
+    // <>
+    <div className='min-h-screen'>
+    <Header/>
       <Home/>
-    </>
+    </div>
+    // </>
   )
 }
 
