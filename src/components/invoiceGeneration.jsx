@@ -1,6 +1,6 @@
 // import type React from "react"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Progress } from "@/components/ui/progress"
 import { Upload, FileText, Check, AlertCircle, Loader2 } from "lucide-react"
+import { generateInvoiceAPI } from "../apis/generateInvoice"
 
 // type ProcessingStatus = "idle" | "uploading" | "analyzing" | "completed" | "error"
 
@@ -73,6 +74,10 @@ export default function InvoiceGeneration() {
       })
     }, 2000)
   }
+
+  useEffect(()=>{
+    generateInvoiceAPI()
+  },[])
 
   const renderUploadSection = () => (
     <Card>
