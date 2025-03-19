@@ -9,12 +9,12 @@ function App() {
   const [count, setCount] = useState(0)
 
   return (
-    // <>
+
     <div className='min-h-screen'>
-    <Header/>
-      <Home/>
+      <Header />
+      <Home />
     </div>
-    // </>
+
   )
 }
 

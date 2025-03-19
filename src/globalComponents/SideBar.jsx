@@ -3,34 +3,40 @@ import { ChevronLeft, ChevronRight, MessageCircle, FileText, FileCheck, Settings
 import { Button } from "@/components/ui/button";
 import { cn } from "../lib/utils"
 
-const Sidebar = () => {
+const Sidebar = ({ activeTab, setActiveTab }) => {
   const [collapsed, setCollapsed] = useState(false);
-  const [activeTab, setActiveTab] = useState("chat");
+  //   const [activeTab, setActiveTab] = useState("chat");
 
   return (
     <div
       className={cn(
+        // h-full
         "h-full transition-all border-r bg-white dark:bg-slate-800 p-4 flex flex-col",
-        collapsed ? "w-16" : "w-180"
+        collapsed ? "w-16" : "w-140"
       )}
     >
       <div className="flex items-center justify-between mb-4">
-        {/* {!collapsed && (
+        <span>
+          {/* {!collapsed && (
           <h2 className="text-2xl font-bold text-primary">Invoice AI</h2>
         )} */}
-        {!collapsed && (
-        <p className="text-sm text-muted-foreground mb-8">
-          As your personal assistant, I can help you with the following tasks...
-        </p>
-      )}
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => setCollapsed(!collapsed)}
-          className="shrink-0"
-        >
-          {collapsed ? <ChevronRight className="w-5 h-5" /> : <ChevronLeft className="w-5 h-5" />}
-        </Button>
+          {!collapsed && (
+            <p className="text-sm text-muted-foreground my-2">
+              As your personal assistant, I can help you with the following tasks...
+            </p>
+
+          )}
+        </span>
+        <span>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setCollapsed(!collapsed)}
+            className="shrink-0"
+          >
+            {collapsed ? <ChevronRight className="w-5 h-5" /> : <ChevronLeft className="w-5 h-5" />}
+          </Button>
+        </span>
       </div>
 
       {/* {!collapsed && (

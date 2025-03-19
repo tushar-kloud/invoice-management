@@ -8,7 +8,8 @@ export const generateInvoiceAPI = async () => {
                 'input_value': "Hello from the IMS system!",
                 'output_type': "chat",
                 'input_type': "chat"
-            },{
+            },
+            {
               header:{
                 'Content-Type': 'application/json'
               }
