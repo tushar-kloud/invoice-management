@@ -14,11 +14,13 @@ export default function ChatInterface() {
   useEffect(() => {
   }, [messages, setMessages])
   return (
-    <div className="flex flex-col h-auto">
-      <div className="flex-1 overflow-y-auto mb-1 space-top-4">
+    <div className="flex flex-col min-h-[78vh] h-auto">
+      <div className="flex-1 h-full overflow-y-auto mb-1 space-top-4">
         <ConversationWindow messages={messages} setMessages={setMessages} />
       </div>
+      <div className="flex-shrink-0">
       <UserInputs message={messages} setMessages={setMessages} />
+      </div>
     </div>
   )
 }
