@@ -15,7 +15,7 @@ export default function ChatInterface() {
   }, [messages, setMessages])
 
   return (
-    <div className="flex flex-col h-[calc(100vh-8rem)]">
+    <div className="flex flex-col h-auto">
       <div className="flex-1 overflow-y-auto mb-1 space-top-4">
         <ConversationWindow messages={messages} setMessages={setMessages} />
       </div>
