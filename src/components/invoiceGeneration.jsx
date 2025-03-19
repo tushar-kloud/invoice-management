@@ -5,10 +5,14 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+// import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Progress } from "@/components/ui/progress"
 import { Upload, FileText, Check, AlertCircle, Loader2 } from "lucide-react"
-import { generateInvoiceAPI } from "../apis/generateInvoice"
+// import { generateInvoiceAPI } from "../apis/generateInvoice"
+import { generateInvoiceAPI } from "../redux/actions/invoiceActions"
+// import InvoicePreview from "./InvoiceGenerationComponents/InvoicePreview"
+import InvoiceForm from "./InvoiceGenerationComponents/InvoicePreview"
+import { useDispatch } from "react-redux"
 
 // type ProcessingStatus = "idle" | "uploading" | "analyzing" | "completed" | "error"
 
@@ -75,9 +79,12 @@ export default function InvoiceGeneration() {
     }, 2000)
   }
 
+  const dispatch = useDispatch()
+
   useEffect(()=>{
-    generateInvoiceAPI()
-  },[])
+    // const invoiceData = generateInvoiceAPI()
+    dispatch(generateInvoiceAPI())
+  },[dispatch])
 
   const renderUploadSection = () => (
     <Card>
@@ -200,7 +207,7 @@ export default function InvoiceGeneration() {
         <CardHeader>
           <CardTitle>Invoice Preview</CardTitle>
         </CardHeader>
-        <CardContent>
+        {/* <CardContent>
           <div className="grid grid-cols-2 gap-4 mb-6">
             <div>
               <Label className="text-xs text-muted-foreground">Invoice Date</Label>
@@ -262,7 +269,8 @@ export default function InvoiceGeneration() {
               Please verify all fields before proceeding. Some fields may require manual adjustment.
             </p>
           </div>
-        </CardContent>
+        </CardContent> */}
+        <InvoiceForm />
         <CardFooter className="flex justify-end space-x-2">
           <Button variant="outline">Edit Invoice</Button>
           <Button>Generate Final Invoice</Button>
