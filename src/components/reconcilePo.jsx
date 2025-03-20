@@ -1,13 +1,15 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Progress } from "@/components/ui/progress"
-import { Upload, FileText, Check, AlertCircle, Loader2, FileCheck } from "lucide-react"
+import { Upload, FileText, Check, AlertCircle, Loader2, FileCheck, CheckCircle } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "../lib/utils"
+import { useDispatch, useSelector } from "react-redux"
+import { reconcileAPI, uploadInvoiceAPI, uploadPOAPI } from "../redux/actions/invoiceActions"
 
 export default function ReconcilePO() {
   const [poFile, setPoFile] = useState(null)
@@ -16,15 +18,30 @@ export default function ReconcilePO() {
   const [reconcileResults, setReconcileResults] = useState(null)
   const [dragActive, setDragActive] = useState({ po: false, invoice: false })
 
+  const dispatch = useDispatch()
+
+  const poUpload = useSelector((state) => state.poUpload)
+  const { loading: poUploadLoading, success: poUploadSuccess, error: poUploadError, poInfo } = poUpload
+
+  const invoiceUpload = useSelector((state) => state.invoiceUpload)
+  const { loading: invoiceUploadLoading, success: invoiceUploadSuccess, error: invoiceUploadError, invoiceInfo } = invoiceUpload
+
+  const reconciliation = useSelector((state) => state.reconciliation)
+  const { loading, error, success: reconciliationSuccess, reconciliationInfo } = reconciliation
+
   const handlePoFileChange = (e) => {
     if (e.target.files && e.target.files[0]) {
       setPoFile(e.target.files[0])
+      // dispatch(uploadPOAPI(poFile))
+      dispatch(uploadPOAPI(e.target.files[0]))
     }
   }
 
   const handleInvoiceFileChange = (e) => {
     if (e.target.files && e.target.files[0]) {
       setInvoiceFile(e.target.files[0])
+      // dispatch(uploadInvoiceAPI(invoiceFile))
+      dispatch(uploadInvoiceAPI(e.target.files[0]))
     }
   }
 
@@ -43,6 +60,7 @@ export default function ReconcilePO() {
     setDragActive({ ...dragActive, po: false })
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       setPoFile(e.dataTransfer.files[0])
+      dispatch(uploadPOAPI(poFile))
       setStatus("idle")
     }
   }
@@ -62,6 +80,7 @@ export default function ReconcilePO() {
     setDragActive({ ...dragActive, invoice: false })
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       setInvoiceFile(e.dataTransfer.files[0])
+      dispatch(uploadInvoiceAPI(invoiceFile))
       setStatus("idle")
     }
   }
@@ -71,34 +90,16 @@ export default function ReconcilePO() {
 
     setStatus("reconciling")
 
-    // Simulate reconciliation process
-    setTimeout(() => {
-      setStatus("completed")
-      setReconcileResults({
-        match: false,
-        poNumber: "PO-2025-0042",
-        invoiceNumber: "INV-2025-0042",
-        poTotal: 2970,
-        invoiceTotal: 3120,
-        discrepancies: [
-          {
-            type: "price",
-            item: "Support Services",
-            poValue: "150.00",
-            invoiceValue: "165.00",
-            severity: "high",
-          },
-          {
-            type: "quantity",
-            item: "Software License",
-            poValue: "1",
-            invoiceValue: "1",
-            severity: "none",
-          },
-        ],
-      })
-    }, 3000)
+    dispatch(reconcileAPI(poFile, invoiceFile))
+
   }
+
+  useEffect(() => {
+    if (reconciliationInfo && reconciliationSuccess) {
+      setStatus("completed")
+      setReconcileResults(reconciliationInfo)
+    }
+  })
 
   const renderFileUpload = () => (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -266,88 +267,115 @@ export default function ReconcilePO() {
 
     return (
       <Card className="mt-6">
-        <CardHeader>
-          <CardTitle className="flex items-center justify-between">
-            <span>Reconciliation Results</span>
-            <Badge variant={reconcileResults.match ? "success" : "destructive"}>
-              {reconcileResults.match ? "Match" : "Discrepancies Found"}
-            </Badge>
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 gap-4 mb-6">
-            <div>
-              <p className="text-sm font-medium">PO Number</p>
-              <p className="text-sm">{reconcileResults.poNumber}</p>
-            </div>
-            <div>
-              <p className="text-sm font-medium">Invoice Number</p>
-              <p className="text-sm">{reconcileResults.invoiceNumber}</p>
-            </div>
-            <div>
-              <p className="text-sm font-medium">PO Total</p>
-              <p className="text-sm">${reconcileResults.poTotal.toFixed(2)}</p>
-            </div>
-            <div>
-              <p className="text-sm font-medium">Invoice Total</p>
-              <p
-                className={cn(
-                  "text-sm",
-                  reconcileResults.poTotal !== reconcileResults.invoiceTotal && "text-destructive font-medium",
-                )}
-              >
-                ${reconcileResults.invoiceTotal.toFixed(2)}
-              </p>
-            </div>
-          </div>
+  <CardHeader>
+    <CardTitle className="flex items-center justify-between">
+      <span>Reconciliation Results</span>
+      <Badge variant={reconciliationInfo.status == "success" ? "success" : "destructive"}>
+        {reconciliationInfo.status == "success" ? "Match" : "Discrepancies Found"}
+      </Badge>
+    </CardTitle>
+  </CardHeader>
 
-          <div className="mb-4">
-            <h3 className="text-sm font-medium mb-2">Discrepancies</h3>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Type</TableHead>
-                  <TableHead>Item</TableHead>
-                  <TableHead>PO Value</TableHead>
-                  <TableHead>Invoice Value</TableHead>
-                  <TableHead>Severity</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {reconcileResults.discrepancies.map((item, index) => (
-                  <TableRow key={index}>
-                    <TableCell className="font-medium capitalize">{item.type}</TableCell>
-                    <TableCell>{item.item}</TableCell>
-                    <TableCell>{item.poValue}</TableCell>
-                    <TableCell className={item.severity !== "none" ? "text-destructive font-medium" : ""}>
-                      {item.invoiceValue}
-                    </TableCell>
-                    <TableCell>
-                      {item.severity === "high" && <Badge variant="destructive">High</Badge>}
-                      {item.severity === "medium" && <Badge variant="warning">Medium</Badge>}
-                      {item.severity === "low" && <Badge variant="outline">Low</Badge>}
-                      {item.severity === "none" && <Badge variant="success">None</Badge>}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
+  <CardContent>
+    {/* PO and Invoice Details */}
+    <div className="grid grid-cols-2 gap-4 mb-6">
+      {/* <div>
+        <p className="text-sm font-medium">PO Number</p>
+        <p className="text-sm">
+          {reconciliation.purchase_order.po_details.match(/PO Number: (\S+)/)?.[1] || reconciliation.purchase_order.po_details || "N/A"}
+        </p>
+      </div>
+      <div>
+        <p className="text-sm font-medium">Invoice Number</p>
+        <p className="text-sm">
+          {reconciliation.invoice.invoice_details.match(/Invoice Number: (\S+)/)?.[1] || reconciliation.invoice.invoice_details || "N/A"}
+        </p>
+      </div> */}
+      {/* <div>
+        <p className="text-sm font-medium">PO Total</p>
+        <p className="text-sm">
+          {reconciliation.purchase_order.po_details.match(/Total Value: (\$\d+,?\d+)/)?.[1] || "N/A"}
+        </p>
+      </div>
+      <div>
+        <p className="text-sm font-medium">Invoice Total</p>
+        <p
+          className={cn(
+            "text-sm",
+            reconciliation.purchase_order.po_details.match(/Total Value: (\$\d+,?\d+)/)?.[1] !==
+              reconciliation.invoice.invoice_details.match(/Total Value: (\$\d+,?\d+)/)?.[1] &&
+              "text-destructive font-medium"
+          )}
+        >
+          {reconciliation.invoice.invoice_details.match(/Total Value: (\$\d+,?\d+)/)?.[1] || "N/A"}
+        </p>
+      </div> */}
+    </div>
 
-          <div className="p-4 bg-muted rounded-lg">
-            <p className="text-sm text-muted-foreground">
-              <AlertCircle className="inline-block mr-2 h-4 w-4" />
-              The AI has detected price discrepancies between the PO and invoice. Please review and take appropriate
-              action.
-            </p>
-          </div>
-        </CardContent>
-        <CardFooter className="flex justify-end space-x-2">
-          <Button variant="outline">Export Report</Button>
-          <Button variant="destructive">Flag for Review</Button>
-          <Button>Approve with Exceptions</Button>
-        </CardFooter>
-      </Card>
+    {/* Discrepancies Section */}
+    {/* {reconciliation.status == " failure" &&  */}
+    {reconciliationInfo?.discrepancies?.length > 0 ? (
+      <div className="mb-4">
+        <h3 className="text-sm font-medium mb-2">Discrepancies</h3>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Item</TableHead>
+              <TableHead>PO Quantity</TableHead>
+              <TableHead>Invoice Quantity</TableHead>
+              <TableHead>PO Price</TableHead>
+              <TableHead>Invoice Price</TableHead>
+              <TableHead>Discrepancy Type</TableHead>
+              <TableHead>Action Required</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {reconciliationInfo.discrepancies.map((item, index) => (
+              <TableRow key={index}>
+                <TableCell className="font-medium">{item.item_name}</TableCell>
+                <TableCell>{item.po_quantity}</TableCell>
+                <TableCell className={item.po_quantity !== item.invoice_quantity ? "text-destructive font-medium" : ""}>
+                  {item.invoice_quantity}
+                </TableCell>
+                <TableCell>₹{item.po_price.toFixed(2)}</TableCell>
+                <TableCell className={item.po_price !== item.invoice_price ? "text-destructive font-medium" : ""}>
+                  ₹{item.invoice_price.toFixed(2)}
+                </TableCell>
+                <TableCell className="capitalize">{item.discrepancy_type}</TableCell>
+                <TableCell>{item.action_required}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+    ) : (
+      <div className="p-4 bg-success/20 rounded-lg">
+        <p className="text-sm text-success-foreground flex items-center">
+          <CheckCircle className="inline-block mr-2 h-4 w-4" />
+          No discrepancies found. The PO and invoice match successfully.
+        </p>
+      </div>
+    )}
+
+    {/* Alert for Issues */}
+    {reconciliation.status === "failure" && (
+      <div className="p-4 bg-muted rounded-lg">
+        <p className="text-sm text-muted-foreground flex items-center">
+          <AlertCircle className="inline-block mr-2 h-4 w-4" />
+          The AI has detected discrepancies between the PO and invoice. Please review and take appropriate action.
+        </p>
+      </div>
+    )}
+  </CardContent>
+
+  {/* Footer Buttons */}
+  <CardFooter className="flex justify-end space-x-2">
+    <Button variant="outline">Export Report</Button>
+    {reconciliation.status === "failure" && <Button variant="destructive">Flag for Review</Button>}
+    <Button>{reconciliation.status === "success" ? "Finalize" : "Approve with Exceptions"}</Button>
+  </CardFooter>
+</Card>
+
     )
   }
 

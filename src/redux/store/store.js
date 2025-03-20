@@ -1,12 +1,15 @@
 import { combineReducers } from "redux";
 import { configureStore } from "@reduxjs/toolkit";
 import { thunk } from "redux-thunk";
-import { generateInvoiceReducer, uploadFileReducer } from "../reducers/invoiceReducers";
+import { generateInvoiceReducer, reconciliationReducer, uploadFileReducer, uploadInvoiceReducer, uploadPOReducer } from "../reducers/invoiceReducers";
 // import InvoiceGeneration from "@//components/invoiceGeneration";
 
 const reducers = combineReducers({
     fileUpload: uploadFileReducer,
-    invoiceGeneration: generateInvoiceReducer
+    poUpload: uploadPOReducer,
+    invoiceUpload: uploadInvoiceReducer,
+    invoiceGeneration: generateInvoiceReducer,
+    reconciliation: reconciliationReducer,
 });
 
 const initialState = {
