@@ -1,26 +1,28 @@
-// import type React from "react"
-
 import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-// import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Progress } from "@/components/ui/progress"
 import { Upload, FileText, Check, AlertCircle, Loader2 } from "lucide-react"
-// import { generateInvoiceAPI } from "../apis/generateInvoice"
-import { generateInvoiceAPI } from "../redux/actions/invoiceActions"
-// import InvoicePreview from "./InvoiceGenerationComponents/InvoicePreview"
+import { uploadFileAPI, generateInvoiceAPI } from "../redux/actions/invoiceActions"
 import InvoiceForm from "./InvoiceGenerationComponents/InvoicePreview"
-import { useDispatch } from "react-redux"
-
-// type ProcessingStatus = "idle" | "uploading" | "analyzing" | "completed" | "error"
+import { useDispatch, useSelector } from "react-redux"
 
 export default function InvoiceGeneration() {
   const [file, setFile] = useState(null)
   const [status, setStatus] = useState("idle")
   const [progress, setProgress] = useState(0)
   const [invoiceData, setInvoiceData] = useState(null)
+  const [filePath, setFilePath] = useState("")
+  
+  const fileUpload = useSelector((state) => state.fileUpload)
+  const {success:fileUploadSuccess, fileInfo} = fileUpload
+
+  const invoiceGeneration = useSelector((state) => state.invoiceGeneration)
+  const { loading, error,success:invoiceGenerationSuccess, invoiceInfo } = invoiceGeneration
+
+  const dispatch = useDispatch()
 
   const handleFileChange = (e) => {
     if (e.target.files && e.target.files[0]) {
@@ -28,7 +30,7 @@ export default function InvoiceGeneration() {
     }
   }
 
-  const handleUpload = () => {
+  const handleUpload = async () => {
     if (!file) return
 
     setStatus("uploading")
@@ -39,68 +41,84 @@ export default function InvoiceGeneration() {
       setProgress((prev) => {
         if (prev >= 100) {
           clearInterval(interval)
-          setStatus("analyzing")
-          simulateAnalysis()
           return 100
         }
         return prev + 10
       })
     }, 300)
+
+    try {
+      dispatch(uploadFileAPI("RAG", file)) // Upload using RAG flag
+      setProgress(100)
+      // if(fileInfo && fileUploadSuccess){
+      //   setFilePath(fileInfo.filePath)
+      //   await handleGenerateInvoice(response.payload.filePath)
+      // } // Store the file path from the response
+      // setStatus("analyzing")
+
+      // Trigger invoice generation upon successful upload
+      
+    } catch (error) {
+      setStatus("error")
+      console.error("Error during file upload:", error)
+    }
+  }
+
+  useEffect(()=>{
+    if((fileInfo && fileUploadSuccess) && (!invoiceGenerationSuccess) ){
+      setFilePath(fileInfo.filePath)
+      setStatus("analyzing")
+      handleGenerateInvoice(fileInfo.filePath)
+    } // Store the file path from the response
+    // setStatus("analyzing")
+
+    if(invoiceInfo && invoiceGenerationSuccess){
+      setInvoiceData(invoiceInfo)
+      setStatus("completed")
+    }
+  },[fileUploadSuccess, fileInfo, invoiceGenerationSuccess, invoiceInfo])
+
+  const handleGenerateInvoice = async (path) => {
+    try {
+      dispatch(generateInvoiceAPI(path)) // Trigger invoice generation
+      // setInvoiceData(data)
+      // setStatus("completed")
+    } catch (error) {
+      setStatus("error")
+      console.error("Error during invoice generation:", error)
+    }
   }
 
   const handleDrop = (e) => {
-    e.preventDefault();
+    e.preventDefault()
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      setFile(e.dataTransfer.files[0]);
-      setStatus("idle");
+      setFile(e.dataTransfer.files[0])
+      setStatus("idle")
     }
-  };
-
-  const handleDragOver = (e) => {
-    e.preventDefault();
-  };
-
-  const simulateAnalysis = () => {
-    // Simulate AI analyzing the document
-    setTimeout(() => {
-      setStatus("completed")
-      setInvoiceData({
-        invoiceDate: "2025-03-09",
-        invoiceNumber: "INV-2025-0042",
-        poNumber: "PO-2025-0042",
-        items: [
-          { description: "Software License", quantity: 1, unitPrice: 1200, total: 1200 },
-          { description: "Support Services", quantity: 10, unitPrice: 150, total: 1500 },
-        ],
-        subtotal: 2700,
-        tax: 270,
-        total: 2970,
-      })
-    }, 2000)
   }
 
-  const dispatch = useDispatch()
-
-  useEffect(()=>{
-    // const invoiceData = generateInvoiceAPI()
-    dispatch(generateInvoiceAPI())
-  },[dispatch])
+  const handleDragOver = (e) => {
+    e.preventDefault()
+  }
 
   const renderUploadSection = () => (
     <Card>
       <CardHeader>
         <CardTitle>Upload Purchase Order</CardTitle>
       </CardHeader>
-      <CardContent
-      // onDrag={(e)=>(document.querySelector('input[type=file]').click())}
-      >
-        <div className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-muted-foreground/25 rounded-lg bg-muted/50"
+      <CardContent>
+        <div
+          className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-muted-foreground/25 rounded-lg bg-muted/50"
           onDrop={handleDrop}
           onDragOver={handleDragOver}
         >
           <FileText className="h-10 w-10 text-muted-foreground mb-4" />
-          <p className="text-sm text-muted-foreground mb-2">Drag and drop your PO file, or click to browse</p>
-          <p className="text-xs text-muted-foreground mb-4">Supports PDF, DOCX, and image files</p>
+          <p className="text-sm text-muted-foreground mb-2">
+            Drag and drop your PO file, or click to browse
+          </p>
+          <p className="text-xs text-muted-foreground mb-4">
+            Supports PDF, DOCX, and image files
+          </p>
           <Input
             type="file"
             id="po-file"
@@ -122,8 +140,12 @@ export default function InvoiceGeneration() {
               <FileText className="h-5 w-5 mr-2 text-muted-foreground" />
               <span className="text-sm font-medium truncate max-w-[200px]">{file.name}</span>
             </div>
-            <Button onClick={handleUpload} disabled={status !== "idle"} size="sm">
-              {status === "idle" ? "Process" : status == "completed" ? "Analyzed" : "Processing..."}
+            <Button
+              onClick={handleUpload}
+              disabled={status !== "idle"}
+              size="sm"
+            >
+              {status === "idle" ? "Process" : status === "completed" ? "Analyzed" : "Processing..."}
             </Button>
           </div>
         )}
@@ -171,29 +193,6 @@ export default function InvoiceGeneration() {
               <p className="text-sm text-muted-foreground text-center">{progress}% uploaded</p>
             </div>
           )}
-
-          {status === "analyzing" && (
-            <div className="space-y-4">
-              <div className="flex items-center space-x-4">
-                <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center">
-                  <Check className="h-4 w-4 text-primary" />
-                </div>
-                <div>
-                  <p className="text-sm font-medium">Document uploaded successfully</p>
-                </div>
-              </div>
-
-              <div className="flex items-center space-x-4">
-                <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center animate-pulse">
-                  <Loader2 className="h-4 w-4 text-primary-foreground animate-spin" />
-                </div>
-                <div>
-                  <p className="text-sm font-medium">Extracting data from document</p>
-                  <p className="text-xs text-muted-foreground">This may take a few moments</p>
-                </div>
-              </div>
-            </div>
-          )}
         </CardContent>
       </Card>
     )
@@ -207,70 +206,7 @@ export default function InvoiceGeneration() {
         <CardHeader>
           <CardTitle>Invoice Preview</CardTitle>
         </CardHeader>
-        {/* <CardContent>
-          <div className="grid grid-cols-2 gap-4 mb-6">
-            <div>
-              <Label className="text-xs text-muted-foreground">Invoice Date</Label>
-              <Input value={invoiceData.invoiceDate} className="mt-1" />
-            </div>
-            <div>
-              <Label className="text-xs text-muted-foreground">Invoice Number</Label>
-              <Input value={invoiceData.invoiceNumber} className="mt-1" />
-            </div>
-            <div>
-              <Label className="text-xs text-muted-foreground">PO Number</Label>
-              <Input value={invoiceData.poNumber} className="mt-1" />
-            </div>
-          </div>
-
-          <Label className="text-xs text-muted-foreground mb-2 block">Line Items</Label>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Description</TableHead>
-                <TableHead className="text-right">Qty</TableHead>
-                <TableHead className="text-right">Unit Price</TableHead>
-                <TableHead className="text-right">Total</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {invoiceData.items.map((item, index) => (
-                <TableRow key={index}>
-                  <TableCell>{item.description}</TableCell>
-                  <TableCell className="text-right">{item.quantity}</TableCell>
-                  <TableCell className="text-right">${item.unitPrice.toFixed(2)}</TableCell>
-                  <TableCell className="text-right">${item.total.toFixed(2)}</TableCell>
-                </TableRow>
-              ))}
-              <TableRow>
-                <TableCell colSpan={3} className="text-right font-medium">
-                  Subtotal
-                </TableCell>
-                <TableCell className="text-right">${invoiceData.subtotal.toFixed(2)}</TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell colSpan={3} className="text-right font-medium">
-                  Tax (10%)
-                </TableCell>
-                <TableCell className="text-right">${invoiceData.tax.toFixed(2)}</TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell colSpan={3} className="text-right font-medium">
-                  Total
-                </TableCell>
-                <TableCell className="text-right font-bold">${invoiceData.total.toFixed(2)}</TableCell>
-              </TableRow>
-            </TableBody>
-          </Table>
-
-          <div className="mt-4 p-4 bg-muted rounded-lg">
-            <p className="text-sm text-muted-foreground">
-              <AlertCircle className="inline-block mr-2 h-4 w-4" />
-              Please verify all fields before proceeding. Some fields may require manual adjustment.
-            </p>
-          </div>
-        </CardContent> */}
-        <InvoiceForm />
+        <InvoiceForm invoiceData={invoiceData} />
         <CardFooter className="flex justify-end space-x-2">
           <Button variant="outline">Edit Invoice</Button>
           <Button>Generate Final Invoice</Button>
@@ -287,4 +223,3 @@ export default function InvoiceGeneration() {
     </div>
   )
 }
-
