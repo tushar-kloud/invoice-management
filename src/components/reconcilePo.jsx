@@ -267,19 +267,19 @@ export default function ReconcilePO() {
 
     return (
       <Card className="mt-6">
-  <CardHeader>
-    <CardTitle className="flex items-center justify-between">
-      <span>Reconciliation Results</span>
-      <Badge variant={reconciliationInfo.status == "success" ? "success" : "destructive"}>
-        {reconciliationInfo.status == "success" ? "Match" : "Discrepancies Found"}
-      </Badge>
-    </CardTitle>
-  </CardHeader>
+        <CardHeader>
+          <CardTitle className="flex items-center justify-between">
+            <span>Reconciliation Results</span>
+            <Badge variant={reconciliationInfo.status == "success" ? "success" : "destructive"}>
+              {reconciliationInfo.status == "success" ? "Match" : "Discrepancies Found"}
+            </Badge>
+          </CardTitle>
+        </CardHeader>
 
-  <CardContent>
-    {/* PO and Invoice Details */}
-    <div className="grid grid-cols-2 gap-4 mb-6">
-      {/* <div>
+        <CardContent>
+          {/* PO and Invoice Details */}
+          <div className="grid grid-cols-2 gap-4 mb-6">
+            {/* <div>
         <p className="text-sm font-medium">PO Number</p>
         <p className="text-sm">
           {reconciliation.purchase_order.po_details.match(/PO Number: (\S+)/)?.[1] || reconciliation.purchase_order.po_details || "N/A"}
@@ -291,7 +291,7 @@ export default function ReconcilePO() {
           {reconciliation.invoice.invoice_details.match(/Invoice Number: (\S+)/)?.[1] || reconciliation.invoice.invoice_details || "N/A"}
         </p>
       </div> */}
-      {/* <div>
+            {/* <div>
         <p className="text-sm font-medium">PO Total</p>
         <p className="text-sm">
           {reconciliation.purchase_order.po_details.match(/Total Value: (\$\d+,?\d+)/)?.[1] || "N/A"}
@@ -310,71 +310,79 @@ export default function ReconcilePO() {
           {reconciliation.invoice.invoice_details.match(/Total Value: (\$\d+,?\d+)/)?.[1] || "N/A"}
         </p>
       </div> */}
-    </div>
+          </div>
 
-    {/* Discrepancies Section */}
-    {/* {reconciliation.status == " failure" &&  */}
-    {reconciliationInfo?.discrepancies?.length > 0 ? (
-      <div className="mb-4">
-        <h3 className="text-sm font-medium mb-2">Discrepancies</h3>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Item</TableHead>
-              <TableHead>PO Quantity</TableHead>
-              <TableHead>Invoice Quantity</TableHead>
-              <TableHead>PO Price</TableHead>
-              <TableHead>Invoice Price</TableHead>
-              <TableHead>Discrepancy Type</TableHead>
-              <TableHead>Action Required</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {reconciliationInfo.discrepancies.map((item, index) => (
-              <TableRow key={index}>
-                <TableCell className="font-medium">{item.item_name}</TableCell>
-                <TableCell>{item.po_quantity}</TableCell>
-                <TableCell className={item.po_quantity !== item.invoice_quantity ? "text-destructive font-medium" : ""}>
-                  {item.invoice_quantity}
-                </TableCell>
-                <TableCell>₹{item.po_price.toFixed(2)}</TableCell>
-                <TableCell className={item.po_price !== item.invoice_price ? "text-destructive font-medium" : ""}>
-                  ₹{item.invoice_price.toFixed(2)}
-                </TableCell>
-                <TableCell className="capitalize">{item.discrepancy_type}</TableCell>
-                <TableCell>{item.action_required}</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
-    ) : (
-      <div className="p-4 bg-success/20 rounded-lg">
-        <p className="text-sm text-success-foreground flex items-center">
-          <CheckCircle className="inline-block mr-2 h-4 w-4" />
-          No discrepancies found. The PO and invoice match successfully.
-        </p>
-      </div>
-    )}
+          {/* Discrepancies Section */}
+          {/* {reconciliation.status == " failure" &&  */}
+          {reconciliationInfo?.discrepancies?.length > 0 ? (
+            <div className="mb-4">
+              <h3 className="text-sm font-medium mb-2">Discrepancies</h3>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Item</TableHead>
+                    <TableHead>PO Quantity</TableHead>
+                    <TableHead>Invoice Quantity</TableHead>
+                    <TableHead>PO Price</TableHead>
+                    <TableHead>Invoice Price</TableHead>
+                    <TableHead>Discrepancy Type</TableHead>
+                    <TableHead>Action Required</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {reconciliationInfo.discrepancies.map((item, index) => (
+                    <TableRow key={index}>
+                      <TableCell className="font-medium">{item.item_name}</TableCell>
+                      <TableCell>{item.po_quantity}</TableCell>
+                      <TableCell className={item.po_quantity !== item.invoice_quantity ? "text-destructive font-medium" : ""}>
+                        {item.invoice_quantity}
+                      </TableCell>
+                      <TableCell>₹{item.po_price.toFixed(2)}</TableCell>
+                      <TableCell className={item.po_price !== item.invoice_price ? "text-destructive font-medium" : ""}>
+                        ₹{item.invoice_price.toFixed(2)}
+                      </TableCell>
+                      <TableCell className="capitalize">{item.discrepancy_type}</TableCell>
+                      <TableCell
+                        style={{
+                          maxWidth: '300px',  // Limit the width of the cell
+                          wordWrap: 'break-word',  // Allow wrapping of long content
+                          whiteSpace: 'normal', // Allow the text to break into multiple lines
+                        }}
+                      >
+                        {item.action_required}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          ) : (
+            <div className="p-4 bg-success/20 rounded-lg">
+              <p className="text-sm text-success-foreground flex items-center">
+                <CheckCircle className="inline-block mr-2 h-4 w-4" />
+                No discrepancies found. The PO and invoice match successfully.
+              </p>
+            </div>
+          )}
 
-    {/* Alert for Issues */}
-    {reconciliation.status === "failure" && (
-      <div className="p-4 bg-muted rounded-lg">
-        <p className="text-sm text-muted-foreground flex items-center">
-          <AlertCircle className="inline-block mr-2 h-4 w-4" />
-          The AI has detected discrepancies between the PO and invoice. Please review and take appropriate action.
-        </p>
-      </div>
-    )}
-  </CardContent>
+          {/* Alert for Issues */}
+          {reconciliation.status === "failure" && (
+            <div className="p-4 bg-muted rounded-lg">
+              <p className="text-sm text-muted-foreground flex items-center">
+                <AlertCircle className="inline-block mr-2 h-4 w-4" />
+                The AI has detected discrepancies between the PO and invoice. Please review and take appropriate action.
+              </p>
+            </div>
+          )}
+        </CardContent>
 
-  {/* Footer Buttons */}
-  <CardFooter className="flex justify-end space-x-2">
-    <Button variant="outline">Export Report</Button>
-    {reconciliation.status === "failure" && <Button variant="destructive">Flag for Review</Button>}
-    <Button>{reconciliation.status === "success" ? "Finalize" : "Approve with Exceptions"}</Button>
-  </CardFooter>
-</Card>
+        {/* Footer Buttons */}
+        <CardFooter className="flex justify-end space-x-2">
+          <Button variant="outline">Export Report</Button>
+          {reconciliation.status === "failure" && <Button variant="destructive">Flag for Review</Button>}
+          <Button>{reconciliation.status === "success" ? "Finalize" : "Approve with Exceptions"}</Button>
+        </CardFooter>
+      </Card>
 
     )
   }

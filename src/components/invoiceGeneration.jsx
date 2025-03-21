@@ -8,6 +8,7 @@ import { Upload, FileText, Check, AlertCircle, Loader2 } from "lucide-react"
 import { uploadFileAPI, generateInvoiceAPI } from "../redux/actions/invoiceActions"
 import InvoiceForm from "./InvoiceGenerationComponents/InvoicePreview"
 import { useDispatch, useSelector } from "react-redux"
+import useGenerateInvoicePDF from "../hooks/invoicePdfGenerator"
 
 export default function InvoiceGeneration() {
   const [file, setFile] = useState(null)
@@ -22,6 +23,15 @@ export default function InvoiceGeneration() {
   const invoiceGeneration = useSelector((state) => state.invoiceGeneration)
   const { loading, error,success:invoiceGenerationSuccess, invoiceInfo } = invoiceGeneration
 
+  const [formData, setFormData] = useState(null);
+
+  const generatePdf = useGenerateInvoicePDF(formData)
+
+  useEffect(()=>{
+    console.log('form data changed',formData);
+    
+  },[formData])
+  
   const dispatch = useDispatch()
 
   const handleFileChange = (e) => {
@@ -206,10 +216,10 @@ export default function InvoiceGeneration() {
         <CardHeader>
           <CardTitle>Invoice Preview</CardTitle>
         </CardHeader>
-        <InvoiceForm invoiceData={invoiceData} />
+        <InvoiceForm formData={formData} setFormData={setFormData} />
         <CardFooter className="flex justify-end space-x-2">
           <Button variant="outline">Edit Invoice</Button>
-          <Button>Generate Final Invoice</Button>
+          <Button onClick={generatePdf}>Generate Final Invoice</Button>
         </CardFooter>
       </Card>
     )
