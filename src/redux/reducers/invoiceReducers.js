@@ -47,7 +47,7 @@ export const generateInvoiceReducer = (state = {}, action) => {
         case GENERATE_INVOICE_SUCCESS:
             return {loading: false, success: true, invoiceInfo: action.payload}
         case GENERATE_INVOICE_FAIL:
-            return {loading: false, error: action.payload}
+            return {loading: false, success:false, error: action.payload}
         default:
             return state
     }
@@ -61,7 +61,7 @@ export const reconciliationReducer = (state = {}, action) => {
         case RECONCILIATION_SUCCESS:
             return {loading: false, success: true, reconciliationInfo: action.payload}
         case RECONCILIATION_FAIL:
-            return {loading: false, error: action.payload}
+            return {loading: false, success:false, error: action.payload}
         default:
             return state
     }

@@ -89,8 +89,9 @@ export default function ReconcilePO() {
     if (!poFile || !invoiceFile) return
 
     setStatus("reconciling")
-
-    dispatch(reconcileAPI(poFile, invoiceFile))
+    // console.log("reconciling",poInfo, invoiceInfo);
+    
+    dispatch(reconcileAPI(poInfo, invoiceInfo))
 
   }
 
@@ -314,7 +315,7 @@ export default function ReconcilePO() {
 
           {/* Discrepancies Section */}
           {/* {reconciliation.status == " failure" &&  */}
-          {reconciliationInfo?.discrepancies?.length > 0 ? (
+          {reconciliation.status == " failure" && reconciliationInfo?.discrepancies?.length > 0 ? (
             <div className="mb-4">
               <h3 className="text-sm font-medium mb-2">Discrepancies</h3>
               <Table>
@@ -358,10 +359,22 @@ export default function ReconcilePO() {
             </div>
           ) : (
             <div className="p-4 bg-success/20 rounded-lg">
+              <div style={{margin:'10px'}}>
               <p className="text-sm text-success-foreground flex items-center">
                 <CheckCircle className="inline-block mr-2 h-4 w-4" />
                 No discrepancies found. The PO and invoice match successfully.
               </p>
+              </div>
+              <Table><TableBody>
+              <TableRow>
+              <TableCell className="font-medium">PO Number</TableCell>
+              <TableCell>{reconciliationInfo?.purchase_order?.po_details}</TableCell>
+              </TableRow>
+              <TableRow>
+              <TableCell className="font-medium">Invoice Number</TableCell>
+              <TableCell>{reconciliationInfo?.invoice?.invoice_details}</TableCell>
+              </TableRow>
+              </TableBody></Table>
             </div>
           )}
 

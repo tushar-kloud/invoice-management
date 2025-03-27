@@ -2,11 +2,15 @@ import { cn } from "../../lib/utils"
 import React, { useState } from 'react'
 import { Button } from "@/components/ui/button"
 import { Send, FileText, FileCheck, HelpCircle, Paperclip, XCircle, Loader2 } from "lucide-react"
+import { AI_PLAYGROUND_WORKFLOWS } from "../../redux/actions/invoiceActions"
 
 const UserInputs = ({setMessages}) => {
     const [inputValue, setInputValue] = useState("")
     const [files, setFiles] = useState([])
     const [uploading, setUploading] = useState(false)
+
+    const flowId = AI_PLAYGROUND_WORKFLOWS.RAG.flowId
+    
 
     const handleSubmit = async () => {
         if (inputValue.trim() || files.length) {
@@ -24,14 +28,15 @@ const UserInputs = ({setMessages}) => {
             }
     
             const response = await fetch(
-              "https://langflow-v3-large.salmonisland-47da943e.centralindia.azurecontainerapps.io/api/v1/run/d7af9af5-efbc-46c1-924e-25397792d27a?stream=false",
+              `${import.meta.env.VITE_AI_PLAYGROUND_BASE_URL}/api/v1/run/${flowId}?stream=false`,
               {
                 method: "POST",
                 headers: {
                   "Content-Type": "application/json",
+                  "x-api-key": `${import.meta.env.VITE_AI_PLAYGROUND_API_KEY}`
                 },
                 body: JSON.stringify(payload),
-              }
+              },
             )
     
             if (response.ok) {

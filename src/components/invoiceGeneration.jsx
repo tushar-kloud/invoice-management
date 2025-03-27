@@ -18,17 +18,17 @@ export default function InvoiceGeneration() {
   const [filePath, setFilePath] = useState("")
   
   const fileUpload = useSelector((state) => state.fileUpload)
-  const {success:fileUploadSuccess, fileInfo} = fileUpload
+  const {success:fileUploadSuccess, loading:fileUploadLoading, fileInfo} = fileUpload
 
   const invoiceGeneration = useSelector((state) => state.invoiceGeneration)
-  const { loading, error,success:invoiceGenerationSuccess, invoiceInfo } = invoiceGeneration
+  const { loading, error: invoiceGenerationError ,success:invoiceGenerationSuccess, invoiceInfo } = invoiceGeneration
 
   const [formData, setFormData] = useState(null);
 
   const generatePdf = useGenerateInvoicePDF(formData)
 
   useEffect(()=>{
-    console.log('form data changed',formData);
+    // console.log('form data changed',formData);
     
   },[formData])
   
@@ -58,7 +58,7 @@ export default function InvoiceGeneration() {
     }, 300)
 
     try {
-      dispatch(uploadFileAPI("RAG", file)) // Upload using RAG flag
+      dispatch(uploadFileAPI("INVOICING", file)) // Upload using RAG flag
       setProgress(100)
       // if(fileInfo && fileUploadSuccess){
       //   setFilePath(fileInfo.filePath)
@@ -75,10 +75,12 @@ export default function InvoiceGeneration() {
   }
 
   useEffect(()=>{
-    if((fileInfo && fileUploadSuccess) && (!invoiceGenerationSuccess) ){
-      setFilePath(fileInfo.filePath)
+    if((fileInfo && fileUploadSuccess==true && fileUploadLoading==false) && (!invoiceGenerationError && !invoiceGenerationSuccess==true) ){
+      setFilePath(fileInfo.file_path)
+
+      // setStatus("analyzing: ",fileInfo.file_path)
+      handleGenerateInvoice(fileInfo.file_path)
       setStatus("analyzing")
-      handleGenerateInvoice(fileInfo.filePath)
     } // Store the file path from the response
     // setStatus("analyzing")
 
