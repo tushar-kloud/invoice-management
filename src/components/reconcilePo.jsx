@@ -391,7 +391,7 @@ export default function ReconcilePO() {
 
         {/* Footer Buttons */}
         <CardFooter className="flex justify-end space-x-2">
-          <Button variant="outline">Export Report</Button>
+          {/* <Button variant="outline">Export Report</Button> */}
           {reconciliation.status === "failure" && <Button variant="destructive">Flag for Review</Button>}
           <Button>{reconciliation.status === "success" ? "Finalize" : "Approve with Exceptions"}</Button>
         </CardFooter>

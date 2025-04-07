@@ -220,7 +220,7 @@ export default function InvoiceGeneration() {
         </CardHeader>
         <InvoiceForm formData={formData} setFormData={setFormData} />
         <CardFooter className="flex justify-end space-x-2">
-          <Button variant="outline">Edit Invoice</Button>
+          {/* <Button variant="outline">Edit Invoice</Button> */}
           <Button onClick={generatePdf}>Generate Final Invoice</Button>
         </CardFooter>
       </Card>
