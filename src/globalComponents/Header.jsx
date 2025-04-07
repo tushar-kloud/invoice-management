@@ -16,8 +16,8 @@ const Header = () => {
                         </div>
                         {/* Navigation */}
                         <div>
-                        <span>Hii it's </span>
-                        <span style={{ fontSize:'30px',fontWeight:'bold'}}>Ive, </span>
+                        <span>Hi it's </span>
+                        <span style={{ fontSize:'30px',fontWeight:'bold'}}>Ivy, </span>
                         <span>your personal finance agent</span>
                         </div>
                         {/* <nav className="flex space-x-6 text-sm font-semibold">

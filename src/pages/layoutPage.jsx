@@ -24,7 +24,7 @@ export default function Home() {
       <div className="flex-1 flex flex-col">
         <header className="border-b bg-white dark:bg-slate-800 px-6 py-3">
           <h1 className="text-xl font-semibold">
-            {activeTab === "chat" && "AI Assistant"}
+            {activeTab === "chat" && "New Prompt"}
             {activeTab === "generate" && "Generate Invoice from PO"}
             {activeTab === "reconcile" && "Reconcile PO & Invoice"}
           </h1>
