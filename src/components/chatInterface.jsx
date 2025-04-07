@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react"
 import ConversationWindow from "./chatInterfaceComponents/ConversationWindow"
-import UserInputs from "./chatInterfaceComponents/userInputs"
+// import UserInputs from "./chatInterfaceComponents/userInputs"
+import UserInputs from "./chatInterfaceComponents/UserInputs"
 
 export default function ChatInterface() {
   const [messages, setMessages] = useState(() => {
