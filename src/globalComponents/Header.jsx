@@ -18,7 +18,7 @@ const Header = () => {
                         <div>
                         <span>Hi it's </span>
                         <span style={{ fontSize:'30px',fontWeight:'bold'}}>Ivy, </span>
-                        <span>your personal ai accounting copilot </span>
+                        <span>your enterprise accounting copilot </span>
                         </div>
                         {/* <nav className="flex space-x-6 text-sm font-semibold">
                             <a href="#" className="hover:text-gray-500">
